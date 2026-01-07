@@ -1,0 +1,140 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+
+<style>
+  #navbarSupportedContent {
+    display: none !important;
+  }
+  .donation-card {
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+
+  .badge-paid {
+    background: linear-gradient(90deg, #2dd4bf, #06b6d4);
+    color: #fff;
+  }
+  .badge-expired {
+    background: linear-gradient(90deg, #ff6834, #ff1912);
+    color: #fff;
+  }
+  .currency {
+    font-weight: 700;
+  }
+
+  .meta-label {
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  .qr-placeholder {
+    background: repeating-linear-gradient(45deg, #e6eef8 0 6px, #ffffff 6px 12px);
+    border-radius: 6px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8
+  }
+</style>
+
+{% if error %}
+  <div class="alert alert-danger">
+    <h3>Error: {{ error }}</h3>
+  </div>
+
+{% elif doc %}
+
+<div class="card donation-card shadow-sm">
+  <div class="row g-0">
+    {% if doc.status == "Pending" %}
+    <div class="col-md-7 p-4">
+    {% else %}
+    <div class="col-md-12 p-4">
+    {% endif %}
+
+      {% if doc.status == "PAID" %}
+      <h5 class="card-title">Terima Kasih atas Donasi Anda</h5>
+      <p class="card-text">Alhamdulillah, Donasi Anda sangat berarti bagi mereka yang membutuhkan. Semoga kebaikan ini
+        menjadi amal jariyah, mendapatkan keberkahan, kesehatan, dan rezeki yang berlipat. Aamiin.</p>
+      {% endif %}
+
+      {% if doc.status != "PAID" %}
+      <h5 class="card-title">Detail Transaksi Donasi Anda</h5>
+      {% endif %}
+
+      <div class="mt-3 mb-2">
+        <span class="meta-label">Status Pembayaran</span>
+        <div class="d-flex align-items-center mt-1">
+          <span class="badge {{ "badge-paid" if doc.status == "PAID" else "badge-expired" }} me-2 px-3 py-2">{{ doc.status }}</span>
+          {% if doc.status == "Pending" %}
+          <small class="text-muted ml-2">Menunggu Pembayaran</small>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col-6 mb-2">
+          <div class="meta-label">ID Pembayaran</div>
+          <div><strong>{{ doc.name }}</strong></div>
+        </div>
+        <div class="col-6 mb-2">
+          <div class="meta-label">Program</div>
+          <div><strong>{{ doc.campaign_id }}</strong></div>
+        </div>
+        <div class="col-6 mb-2">
+          <div class="meta-label">Nama</div>
+          <div><strong>{{ doc.customer }}</strong></div>
+        </div>
+        <div class="col-6 mb-2">
+          <div class="meta-label">Nominal</div>
+          <div class="currency">{{ frappe.utils.fmt_money(doc.amount, currency="IDR", precision=0) }}</div>
+        </div>
+
+
+        <div class="col-6 mb-2">
+          <div class="meta-label">Metode Pembayaran</div>
+          <div>{{ doc.paymentmethod }}</div>
+        </div>
+        <div class="col-6 mb-2">
+          <div class="meta-label">Tanggal</div>
+          <div>{{ frappe.utils.format_datetime(doc.creation, "dd MMMM yyyy - HH:mm") }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 mt-5">
+          <div class="small text-muted text-center">
+          Terima kasih atas kepercayaan Anda. <br>Jika ada pertanyaan, silakan hubungi tim kami.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if doc.status == "Pending" %}
+    <div class="col-md-5 p-4 border-start d-flex flex-column justify-content-center">
+      <div class="mb-3 text-center">
+        
+        {% if doc.qr_image %}
+        <img src="{{ doc.qr_image }}" style="width:450px;border:1px solid #ddd;padding:8px;border-radius:8px" />
+        {% endif %}
+
+        <small class="d-block text-muted mt-2">Scan atau Pindai untuk melakukan pembayaran</small>
+        
+      </div>
+
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% else %}
+  <h3>Data tidak ditemukan</h3>
+{% endif %}
+
+{% endblock %}
